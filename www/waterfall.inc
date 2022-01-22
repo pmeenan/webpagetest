@@ -1245,8 +1245,12 @@ function DrawCenteredText($im, $x, $y, $label, $font, $font_width, $color) {
 * @return string
 */
 function GetRequestLabel($request, $show_labels = true) {
-    $path = parse_url('http://' . $request['host'] . $request['url'],
-                      PHP_URL_PATH);
+    if (isset($request['full_url'])) {
+      $path = parse_url($request['full_url'], PHP_URL_PATH);
+    } else {
+      $path = parse_url('http://' . $request['host'] . $request['url'],
+                        PHP_URL_PATH);
+    }
     $path_base = basename($path);
     if (substr($path, -1) == '/') {
         $path_base .= '/';  // preserve trailing slash
@@ -1432,11 +1436,11 @@ function AddBarIfValid(&$bars, $key, $start_key, $end_key, $request, $x_scaler, 
 * Insert an interactive waterfall into the current page
 *
 */
-function InsertWaterfall($url, $requests, $id, $run, $cached, $page_data, $waterfall_options = '') {
-  echo CreateWaterfallHtml($url, $requests, $id, $run, $cached, $page_data, $waterfall_options);
+function InsertWaterfall($url, $requests, $id, $run, $cached, $page_data, $waterfall_options = '', $step = 1, $basepath='') {
+  echo CreateWaterfallHtml($url, $requests, $id, $run, $cached, $page_data, $waterfall_options, $step, $basepath);
 }
 
-function CreateWaterfallHtml($url, $requests, $id, $run, $cached, $page_data, $waterfall_options = '', $step = 1) {
+function CreateWaterfallHtml($url, $requests, $id, $run, $cached, $page_data, $waterfall_options = '', $step = 1, $basepath='') {
     // create the image map (this is for fallback when JavaScript isn't enabled
     // but also gives us the position for each request)
     $out = '<map name="waterfall_map_step' . $step . '">';
@@ -1472,7 +1476,7 @@ function CreateWaterfallHtml($url, $requests, $id, $run, $cached, $page_data, $w
     // main container for the waterfall
     $out .= '<div class="waterfall-container">';
     $out .= "<img class=\"waterfall-image\" alt=\"\" onload=\"markUserTime('aft.Waterfall')\" usemap=\"#waterfall_map_step$step\" " .
-            "id=\"waterfall_step$step\" src=\"/waterfall.php?test=$id&run=$run&cached=$cached&step=$step$waterfall_options\">";
+            "id=\"waterfall_step$step\" src=\"$basepath/waterfall.php?test=$id&run=$run&cached=$cached&step=$step$waterfall_options\">";
 
     $stepSuffix = "-step" . $step;
     // draw div's over each of the waterfall elements (use the image map as a reference)
