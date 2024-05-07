@@ -568,9 +568,11 @@ class RunResultHtmlTable
                     ['custom' => $customMetrics],
                     (new Timings($this->runResults))->getAllForStep($stepNum),
                 );
-                $out .= view('partials.timings', [
-                    'data' => $timingsAndMetrics,
-                ]);
+                try {
+                    $out .= view('partials.timings', [
+                        'data' => $timingsAndMetrics,
+                    ]);
+                } catch (Exception $e) {}
             }
         }
         return $out;
